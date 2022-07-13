@@ -1,0 +1,73 @@
+
+--1
+
+SELECT c."Customer Names" , SUM((so."Order Quantity" * so."Unit Price")) as total
+FROM customers c
+INNER JOIN sales_order so ON c."_CustomerID" = so."_CustomerID" 
+GROUP BY "Customer Names"
+ORDER BY total desc
+LIMIT 5
+
+--2
+
+SELECT r."State", SUM(so."Order Quantity") as total
+FROM regions r
+INNER JOIN store_locations sl  on sl."StateCode" = r."StateCode" 
+inner join sales_order so on sl."_StoreID" = so."_StoreID"
+GROUP BY r."State" 
+order by total desc 
+
+--3
+
+select sl."City Name",  SUM(so."Order Quantity") as total
+from regions r
+INNER JOIN store_locations sl  on sl."StateCode" = r."StateCode" 
+inner join sales_order so on sl."_StoreID" = so."_StoreID" 
+where r."State" = 'Indiana'
+group by sl."City Name"
+order by total desc
+
+--4
+
+select sl."City Name", r."State", SUM((so."Unit Price" * so."Order Quantity"/sl."Population"::double precision)) as total
+from store_locations sl
+INNER JOIN sales_order so on sl."_StoreID" = so."_StoreID" 
+INNER JOIN regions r ON r."StateCode" = sl."StateCode"
+group by sl."City Name", r."State"
+order by total desc
+
+--5
+SELECT p."Product Name" , SUM (so."Order Quantity") as total
+FROM products p 
+INNER JOIN sales_order so on so."_ProductID" = p."_ProductID" 
+GROUP BY p."Product Name" 
+order by total desc 
+
+--6
+
+SELECT r."State", sl."City Name", sl."Water Area", so."Order Quantity", p."Product Name"
+FROM regions r
+INNER JOIN store_locations sl ON sl."StateCode" =  r."StateCode"
+INNER JOIN sales_order so ON so."_StoreID" = sl."_StoreID"
+INNER JOIN products p ON p."_ProductID" = so."_ProductID"
+WHERE "Water Area" = (
+    SELECT MAX("Water Area") from store_locations)
+ORDER BY "Water Area" desc, "Order Quantity" desc
+
+--7
+
+SELECT AVG(so."DeliveryDate" - so."OrderDate") as prazo_medio
+FROM regions r
+INNER JOIN store_locations sl ON sl."StateCode" = r."StateCode"
+INNER JOIN sales_order so ON so."_StoreID"  = sl."_StoreID" 
+WHERE r."Region" = 'Northeast'
+
+--8
+select c."Customer Names", SUM((so."Unit Price" - so."Unit Cost")* so."Order Quantity") as lucro
+from sales_order so
+INNER JOIN customers c  on c."_CustomerID" = so."_CustomerID"
+group by c."Customer Names"
+order by lucro desc
+
+
+
